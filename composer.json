@@ -11,7 +11,7 @@
 		}
 	],
 	"autoload": {
-		"psr-4": { "VirtualAssembly\\SemanticFormsBundle": "" }
+		"psr-0": { "VirtualAssembly\\SemanticFormsBundle": "" }
 	},
 	"minimum-stability": "dev",
 
