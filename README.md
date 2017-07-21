@@ -20,6 +20,6 @@ If you want to test this bundle, you need to add in your main composer :
 	"repositories": [
         {
             "type": "vcs",
-            "url": ""
+            "url": "https://github.com/assemblee-virtuelle/SemanticFormsBundle.git"
         }
     ],
