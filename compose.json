@@ -1,0 +1,28 @@
+{
+	"name": "VirtualAssembly/SemanticFormsBundle",
+	"type": "symfony-bundle",
+	"description": "Symfony VirtualAssembly SemanticFormsBundle",
+	"keywords": ["client","semanticForms"],
+	"authors": [
+		{
+			"name": "Virtual Assembly",
+			"email": "contact@assemblee-virtuelle.org",
+			"homepage": "assemblee-virtuelle.org"
+		}
+	],
+	"autoload": {
+		"psr-4": { "VirtualAssembly\\SemanticFormsBundle": "" }
+	},
+	"minimum-stability": "dev",
+
+    "require" : {
+    },
+    "target-dir" : "VirtualAssembly/SemanticFormsBundle",
+    "repositories" : [{
+    }],
+    "extra" : {
+    "branch-alias" : {
+            "dev-master" : "1.0-dev"
+        }
+    }
+}
