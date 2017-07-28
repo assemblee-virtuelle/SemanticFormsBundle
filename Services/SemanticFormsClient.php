@@ -124,7 +124,7 @@ class SemanticFormsClient
 
         $options['headers'] = [
             // Sign request.
-          'User-Agent'      => 'GrandsVoisinsBundle',
+          'User-Agent'      => 'SemanticFormsClient',
             // Ensure to get JSON response.
           'Accept'          => 'application/json',
           'Accept-Language' => 'fr',
@@ -184,7 +184,7 @@ class SemanticFormsClient
     {
         $options['headers'] = [
             // Sign request.
-            'User-Agent' => 'GrandsVoisinsBundle',
+            'User-Agent' => 'SemanticFormsClient',
             // Ensure to get JSON response.
             'Accept'     => 'application/json',
         ];
@@ -419,7 +419,7 @@ class SemanticFormsClient
         $options            = ['verify' => false];
         $options['headers'] = [
             // Sign request.
-          'User-Agent'      => 'GrandsVoisinsBundle',
+          'User-Agent'      => 'SemanticFormsClient',
             // Ensure to get JSON response.
           'Accept'          => 'application/json',
           'Accept-Language' => 'fr',
