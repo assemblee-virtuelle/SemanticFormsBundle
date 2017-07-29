@@ -7,7 +7,7 @@ php:
 
 before_script:
   - composer install
-  - cd Symfony
+  - composer require --dev
 
 script: phpunit --coverage-text
 
