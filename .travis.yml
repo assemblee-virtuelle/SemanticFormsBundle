@@ -7,7 +7,7 @@ php:
   - 7.1
 
 before_script:
-  - composer install --dev
+  - composer install
 
 script: phpunit --coverage-text "./Tests/Controller/DefaultControllerTest.php"
 
