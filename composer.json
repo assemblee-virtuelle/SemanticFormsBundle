@@ -16,7 +16,7 @@
 	"minimum-stability": "dev",
 
     "require" : {
-	"phpunit/phpunit" : "latest"
+	"phpunit/phpunit" : "6.2.3"
     },
     "target-dir" : "VirtualAssembly/SemanticFormsBundle",
     "repositories" : [],
