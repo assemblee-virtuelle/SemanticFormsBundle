@@ -17,7 +17,8 @@
 
     "require" : {
 	"phpunit/phpunit" : "5.7.21",
-	"symfony/framework-bundle" : "3.3.5"
+	"symfony/framework-bundle" : "3.3.5",
+	"symfony/http-foundation" : "3.3.5"
     },
     "target-dir" : "VirtualAssembly/SemanticFormsBundle",
     "repositories" : [],
