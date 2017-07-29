@@ -1,15 +1,36 @@
 language: php
 
+
 php:
+  - 5.5
   - 5.6
   - 7.0
-  - 7.1
+ 
+matrix:
+  fast_finish: true
+  include:
+    - php: 5.6
+      env: SYMFONY_VERSION=2.3.*
+    - php: 5.6
+      env: SYMFONY_VERSION=2.7.*
+    - php: 5.6
+      env: SYMFONY_VERSION=2.8.*
+    - php: 5.6
+      env: SYMFONY_VERSION=3.0.*
 
-before_script:
-  - composer install
-  - composer require --dev
+cache:
+  directories:
+    - $HOME/.composer/cache
 
-script: phpunit --coverage-text "./Tests/Controller/DefaultControllerTest.php"
+before_install:
+  - composer selfupdate
+  - if [ "$SYMFONY_VERSION" != "" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --no-update; fi;
+
+install:
+  - composer update --no-interaction $COMPOSER_FLAGS
+
+script: 
+  - phpunit --coverage-text --coverage-clover=coverage.clover
 
 notifications:
   email:
