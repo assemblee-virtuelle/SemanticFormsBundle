@@ -9,7 +9,7 @@ php:
 before_script:
   - composer install --dev
 
-script: phpunit --coverage-text "./Tests/DefaultControllerTest.php"
+script: phpunit --coverage-text "./Tests/Controller/DefaultControllerTest.php"
 
 notifications:
   email:
