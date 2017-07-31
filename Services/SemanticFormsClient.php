@@ -249,6 +249,23 @@ class SemanticFormsClient
         );
     }
 
+		/**
+		 * @param $term
+		 * @return mixed
+		 */
+		public function import($term)
+		{
+				return json_decode(
+					$this->get(
+						'/display',
+						[
+							'query' => [
+								'displayuri' => $term,
+							],
+						]
+					)
+				);
+		}
     /**
      * @param $specType
      * @return array
