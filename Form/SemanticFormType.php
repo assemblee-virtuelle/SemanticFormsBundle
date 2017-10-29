@@ -35,7 +35,7 @@ abstract class SemanticFormType extends AbstractType
             'values'   => '',
             'spec'     => '',
             'role'     => '',
-            'reverse'     => '',
+            'sfConf'     => '',
           )
         );
     }
@@ -48,8 +48,9 @@ abstract class SemanticFormType extends AbstractType
         $login    = $options['login'];
         $password = $options['password'];
         $graphURI = $options['graphURI'];
-        $reverse = $options['reverse'];
         $editMode = !!$options['values'];
+        $sfConf = $options['sfConf'];
+        $this->fieldsAliases = $sfConf['fields'];
 
         // We have an uri (edit mode).
         if ($editMode) {
@@ -107,7 +108,7 @@ abstract class SemanticFormType extends AbstractType
             $login,
             $password,
             $graphURI,
-            $reverse
+						$sfConf
           ) {
               $form = $event->getForm();
               // Add uri for external usage.
@@ -146,11 +147,11 @@ abstract class SemanticFormType extends AbstractType
                 $login,
                 $password
               );
-
+							$reverse = $sfConf['reverse'];
               if (array_key_exists($type,$reverse)){
                   $values = array();
                   foreach ($reverse[$type] as $key=>$elem){
-                      $localHtmlName = $this->fieldsAliases[$key];
+                      $localHtmlName = $this->fieldsAliases[$key]['value'];
                       if (array_key_exists($elem,$values))
                         $values[$elem] = array_merge($values[$elem],json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY));
                       else
@@ -304,7 +305,7 @@ abstract class SemanticFormType extends AbstractType
     function getLocalHtmlName($htmlName)
     {
         if (isset($this->fieldsAliases[$htmlName])) {
-            return $this->fieldsAliases[$htmlName];
+            return $this->fieldsAliases[$htmlName]['value'];
         } else {
             return $htmlName;
         }

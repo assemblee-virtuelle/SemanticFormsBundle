@@ -29,7 +29,6 @@ class SemanticFormsClient
       'skos'  => '<http://www.w3.org/2004/02/skos/core#>',
     ];
     var $prefixesCompiled = '';
-    var $fieldsAliases = [];
 
 
     CONST VALUE_TYPE_URI = 1;
@@ -42,7 +41,6 @@ class SemanticFormsClient
      * @param $password
      * @param $timeout
      * @param array $prefixes
-     * @param array $fieldsAliases
      * @param $baseUrlForm
      */
     public function __construct(
@@ -51,7 +49,6 @@ class SemanticFormsClient
       $password,
       $timeout,
       $prefixes = [],
-      $fieldsAliases = [],
       $baseUrlForm
     ) {
 
@@ -59,7 +56,6 @@ class SemanticFormsClient
         $this->login         = $login;
         $this->password      = $password;
         $this->timeout       = $timeout;
-        $this->fieldsAliases = $fieldsAliases;
         $this->prefixes      = array_merge($this->prefixes, $prefixes);
         $this->baseUrlForm = $baseUrlForm;
         foreach ($this->prefixes as $key => $uri) {
@@ -413,10 +409,8 @@ class SemanticFormsClient
           'uri' => $uri,
         ];
 
-        $prefixesReverted = array_flip($this->fieldsAliases);
         foreach ($response['results']['bindings'] as $item) {
             $key = $item['P']['value'];
-            $key = isset($prefixesReverted[$key]) ? $prefixesReverted[$key] : $key;
             if (!isset($output[$key])) {
                 $output[$key] = [];
             }
