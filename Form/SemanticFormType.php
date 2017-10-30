@@ -148,9 +148,8 @@ abstract class SemanticFormType extends AbstractType
                 $password
               );
 							$reverse = $sfConf['reverse'];
-              if (array_key_exists($type,$reverse)){
                   $values = array();
-                  foreach ($reverse[$type] as $key=>$elem){
+                  foreach ($reverse as $key=>$elem){
                       $localHtmlName = $this->fieldsAliases[$key]['value'];
                       if (array_key_exists($elem,$values))
                         $values[$elem] = array_merge($values[$elem],json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY));
@@ -158,8 +157,7 @@ abstract class SemanticFormType extends AbstractType
                         $values[$elem] = json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY);
 
                   }
-                  $this->update($graphURI,$this->uri,$type,$values,$client,$reverse);
-              }
+                  $this->update($graphURI,$this->uri,$values,$client,$reverse);
 
           }
         );
@@ -318,12 +316,10 @@ abstract class SemanticFormType extends AbstractType
         );
     }
 
-    private function update($graph,$subject,$type,$values,$sfClient,$reverse){
+    private function update($graph,$subject,$values,$sfClient,$reverse){
 
-        //récupérer tous les liens en fonction du type
-        $tab = $reverse[$type];
         //supprimer tous les précédent liens
-        foreach ($tab as $key=>$elem){
+        foreach ($reverse as $key=>$elem){
             $query="DELETE { GRAPH <".$graph."> { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE { GRAPH <".$graph."> { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." .}}";
             $sfClient->update($query);
         }
