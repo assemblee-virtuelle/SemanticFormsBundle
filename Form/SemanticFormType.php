@@ -194,13 +194,22 @@ abstract class SemanticFormType extends AbstractType
         return $this;
     }
 
-    function buildHtmlName($subject, $predicate, $value)
-    {
-        return urlencode(
-        // Concatenate : <S> <P> <"O">.
-          '<'.implode('> <', [$subject, $predicate, ''.$value.'']).'>.'
-        );
-    }
+		function buildHtmlName($subject, $predicate, $value,$test = false)
+		{
+
+				if($test){
+						return urlencode(
+						// Concatenate : <S> <P> <"O">.
+							'<'.implode('> <', [$subject, $predicate]).'> "'.$value.'"@en .'
+						);
+				}
+				else{
+						return urlencode(
+						// Concatenate : <S> <P> <"O">.
+							'<'.implode('> <', [$subject, $predicate, ''.$value.'']).'>.'
+						);
+				}
+		}
 
     /**
      * From front form to semantic forms.
@@ -252,6 +261,37 @@ abstract class SemanticFormType extends AbstractType
 
                     return $output;
                     break;
+								// adresse
+								case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
+										$output = [];
+										$values = json_decode($values, JSON_OBJECT_AS_ARRAY);
+										if (is_array($values)) {
+												// Empty all previous values
+												foreach ($spec['value'] as $value) {
+														$htmlName          = $this->buildHtmlName(
+															$subject,
+															$spec['property'],
+															$value,
+															true
+														);
+														$output[$htmlName] = '';
+
+												}
+												$i=0;
+												// Add new values.
+												foreach (array_keys($values) as $value) {
+														$htmlName          = $this->buildHtmlName(
+															$subject,
+															$spec['property'],
+															$i,
+															true
+														);
+														$i++;
+														$output[$htmlName] = $value;
+												}
+										}
+										return $output;
+										break;
             }
         }
 
@@ -283,9 +323,11 @@ abstract class SemanticFormType extends AbstractType
             case 'Symfony\Component\Form\Extension\Core\Type\NumberType':
                 return (float) current($values);
 
-            // Uri
-            case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
-                // DbPedia
+						// Uri
+						case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
+            // adresse
+            case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
+						// DbPedia
             case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
                 // Keep only links.
                 return is_array($values) ? json_encode(
