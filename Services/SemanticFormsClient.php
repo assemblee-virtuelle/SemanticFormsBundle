@@ -48,8 +48,7 @@ class SemanticFormsClient
       $login,
       $password,
       $timeout,
-      $prefixes = [],
-      $baseUrlForm
+      $prefixes = []
     ) {
 
         $this->domain        = $domain;
@@ -57,7 +56,6 @@ class SemanticFormsClient
         $this->password      = $password;
         $this->timeout       = $timeout;
         $this->prefixes      = array_merge($this->prefixes, $prefixes);
-        $this->baseUrlForm = $baseUrlForm;
         foreach ($this->prefixes as $key => $uri) {
             $this->prefixesCompiled .= "\nPREFIX ".$key.': '.$uri.' ';
         }
@@ -275,7 +273,7 @@ class SemanticFormsClient
           '/create-data',
           [
             'query' => [
-              'uri' => $this->getSpec($specType),
+              'uri' => $specType,
             ],
           ]
         );
@@ -296,7 +294,7 @@ class SemanticFormsClient
           [
             'query' => [
               'displayuri' => $uri,
-              'formuri'    => $this->getSpec($specType),
+              'formuri'    => $specType,
             ],
           ]
         );
@@ -470,15 +468,6 @@ class SemanticFormsClient
         }
 
         return false;
-    }
-
-    /**
-     * @param $specType
-     * @return string
-     */
-    public function getSpec($specType)
-    {
-        return $this->baseUrlForm.$specType;
     }
 
     /**
