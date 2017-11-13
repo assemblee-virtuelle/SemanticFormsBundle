@@ -148,17 +148,18 @@ abstract class SemanticFormType extends AbstractType
                 $password
               );
 							$reverse = $sfConf['reverse'];
-                  $values = array();
-                  foreach ($reverse as $key=>$elem){
-                      $localHtmlName = $this->fieldsAliases[$key]['value'];
-                      if (array_key_exists($elem,$values))
-                        $values[$elem] = array_merge($values[$elem],json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY));
-                      else
-                        $values[$elem] = json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY);
+							if(!is_null($reverse)){
+									$values = array();
+									foreach ($reverse as $key=>$elem){
+											$localHtmlName = $this->fieldsAliases[$key]['value'];
+											if (array_key_exists($elem,$values))
+													$values[$elem] = array_merge($values[$elem],json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY));
+											else
+													$values[$elem] = json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY);
 
-                  }
-                  $this->update($graphURI,$this->uri,$values,$client,$reverse);
-
+									}
+									$this->update($graphURI,$this->uri,$values,$client,$reverse);
+							}
           }
         );
     }
