@@ -72,7 +72,6 @@ class VirtualAssemblyFieldUri {
   setValue(uri, text) {
     // Add to values.
     this.value[uri] = text;
-    $.ajax({});
     // Reload list.
     this.fillValues();
   }
