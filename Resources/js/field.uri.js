@@ -80,16 +80,17 @@ class VirtualAssemblyFieldUri {
     this.$value.val(JSON.stringify(this.value));
     this.$tags.empty();
     $.each(this.value, (uri, text) => {
-      // Build item.
-      let $item = $('<span class="tag">' + text + ' <a href="#" class="remove-tag glyphicon glyphicon-remove"></a></span>')
-      // Click event.
-      $item.find('a.remove-tag').click((e) => {
-        e.preventDefault();
+      if (text !== false){
+        let $item = $('<span class="tag">' + text + ' <a href="#" class="remove-tag glyphicon glyphicon-remove"></a></span>')
+        // Click event.
+        $item.find('a.remove-tag').click((e) => {
+            e.preventDefault();
         delete this.value[uri];
         this.fillValues();
       });
       // Append.
-      this.$tags.append($item);
+        this.$tags.append($item);
+      }
     });
     this.$tags.append('<div class="clearfix"></div>');
     // Show tags section if not empty.
