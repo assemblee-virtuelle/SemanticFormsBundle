@@ -23,6 +23,7 @@ abstract class SemanticFormType extends AbstractType
     var $fieldsAdded = [];
     var $fieldsAliases = [];
     var $uri;
+    var $conf;
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -51,6 +52,7 @@ abstract class SemanticFormType extends AbstractType
         $editMode = !!$options['values'];
         $sfConf = $options['sfConf'];
         $this->fieldsAliases = $sfConf['fields'];
+        $this->conf = $sfConf;
 
         // We have an uri (edit mode).
         if ($editMode) {
@@ -121,12 +123,12 @@ abstract class SemanticFormType extends AbstractType
                 'graphURI' => $graphURI,
               ];
 
-              if (!$editMode) {
+              //if (!$editMode) {
                   // Required type.
                   $saveData[$this->getDefaultHtmlName(
                     'type'
-                  )] = $type;
-              }
+                  )] = $this->conf['type'];
+              //}
                 $subject = $this->uri;
               foreach ($this->fieldsAdded as $localHtmlName) {
                   $fieldSpec    = $this->formSpecification[$localHtmlName];
@@ -256,8 +258,12 @@ abstract class SemanticFormType extends AbstractType
                               $i
                             );
                             $i++;
-                            $output[$htmlName] = $value;
-                        }
+														if(!is_integer($value))
+																$output[$htmlName] = $value;
+														else
+																$output[$htmlName] = $values[$value];
+
+												}
                     }
 
                     return $output;
