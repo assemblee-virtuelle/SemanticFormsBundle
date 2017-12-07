@@ -373,7 +373,7 @@ abstract class SemanticFormType extends AbstractType
 
         //supprimer tous les précédent liens
         foreach ($reverse as $key=>$elem){
-            $query="DELETE { GRAPH <".$graph."> { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE { GRAPH <".$graph."> { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." .}}";
+						$query="DELETE { GRAPH ?gr { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE { GRAPH ?gr { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." .}}";
             $sfClient->update($query);
         }
         //loop sur les nouveaux liens
@@ -381,7 +381,7 @@ abstract class SemanticFormType extends AbstractType
         foreach ($values as $predicat=>$elems){
 						foreach ($elems as $link=>$elem){
 								if (!is_integer($link)){
-										$query="INSERT DATA { GRAPH <".$graph."> { <".$link."> <".$predicat."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }}";
+										$query="INSERT { GRAPH ?GR { <".$link."> <".$predicat."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE {GRAPH ?GR { <".$link."> ?p ?o .}}";
 										$sfClient->update($query);
 								}
 						}
