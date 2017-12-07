@@ -1,6 +1,8 @@
 VirtualAssembly/SemanticFormsBundle 
 ===============
 
+[![Build Status](https://travis-ci.org/balessan/SemanticFormsBundle.svg?branch=master)](https://travis-ci.org/balessan/SemanticFormsBundle)
+
 This is a SemanticForms bundle in WORK IN PROGRESS. 
 There is not a stable version for the moment.
 
