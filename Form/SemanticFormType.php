@@ -67,6 +67,9 @@ abstract class SemanticFormType extends AbstractType
               $options['spec']
             );
             $uri                  = $formSpecificationRaw['subject'];
+            if($graphURI == null ){
+            		$graphURI =  $formSpecificationRaw['subject'];
+						}
         }
 
         $this->uri = $uri;
@@ -252,17 +255,18 @@ abstract class SemanticFormType extends AbstractType
                         $i=0;
                         // Add new values.
                         foreach (array_keys($values) as $value) {
-                            $htmlName          = $this->buildHtmlName(
-                              $subject,
-                              $spec['property'],
-                              $i
-                            );
-                            $i++;
-														if(!is_integer($value))
-																$output[$htmlName] = $value;
-														else
-																$output[$htmlName] = $values[$value];
-
+														if(!empty($value)) {
+																$htmlName = $this->buildHtmlName(
+																	$subject,
+																	$spec['property'],
+																	$i
+																);
+																$i++;
+																if (!is_integer($value))
+																		$output[$htmlName] = $value;
+																else
+																		$output[$htmlName] = $values[$value];
+														}
 												}
                     }
 
