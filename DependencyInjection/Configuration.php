@@ -19,7 +19,22 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('semantic_forms');
-
+				$rootNode
+					->children()
+						->arrayNode('fields_aliases')
+						->end() // twitter
+						->scalarNode('domain')
+						->end() // twitter.
+						->variableNode('login')
+						->end() // twitter
+						->variableNode('password')
+						->end() // twitter
+						->integerNode('timeout')
+						->end() // twitter
+						->scalarNode('base_url_form')
+						->end() // twitter
+					->end()
+				;
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
