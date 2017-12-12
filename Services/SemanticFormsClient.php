@@ -418,59 +418,100 @@ class SemanticFormsClient
         return $output;
     }
 
-    /**
-     * @param $uri
-     * @param string $lang
-     * @return bool
-     */
-    public function dbPediaLabel($uri, $lang = 'en')
-    {
-        $options            = ['verify' => false];
-        $options['headers'] = [
-            // Sign request.
-          'User-Agent'      => 'SemanticFormsClient',
-            // Ensure to get JSON response.
-          'Accept'          => 'application/json',
-          'Accept-Language' => 'fr',
-        ];
+		private function dbpedia($uri){
+				$options            = ['verify' => false];
+				$options['headers'] = [
+						// Sign request.
+					'User-Agent'      => 'SemanticFormsClient',
+						// Ensure to get JSON response.
+					'Accept'          => 'application/json',
+					'Accept-Language' => 'fr',
+				];
 
-        $data = json_decode($this->get($uri, $options));
+				$data = json_decode($this->get($uri, $options));
+				return $data->$uri;
 
-        if ($data) {
-            $key  = 'http://www.w3.org/2000/01/rdf-schema#label';
-            $data = $data->$uri->$key;
-            // Expected lang.
-            $result = $this->dbPediaLabelSearch($data, $lang);
-            // English.
-            if ($result === false && $lang !== 'en') {
-                $result = $this->dbPediaLabelSearch($data, $lang);
-            }
-            // First value.
-            if ($result === false && !empty($data)) {
-                $result = current($data)['value'];
-            }
+		}
 
-            return $result;
-        }
-    }
+		public function dbpediaDetail($conf,$uri, $lang = 'en'){
+				$dataComplete = $this->dbpedia($uri);
+				$result = [];
+				if ($dataComplete) {
+						foreach ($conf['fields'] as $predicat =>$key){
+								if(array_key_exists($predicat,$dataComplete)){
+										$data = $dataComplete->$predicat;
+										// Expected lang.
+										$result[$key['value']] = $this->dbPediaLabelSearch($data, $lang);
+										//dump($result);exit;
 
-    /**
-     * @param $data
-     * @param $lang
-     * @return bool
-     */
-    public function dbPediaLabelSearch($data, $lang)
-    {
-        foreach ($data as $item) {
-            if ($item->lang === $lang) {
-                return $item->value;
-            }
-        }
+										// English.
+										if ($result[$key['value']] === false && $lang !== 'en') {
+												$result[$key['value']] = $this->dbPediaLabelSearch($data, 'en');
+										}
+										// First value.
+										if ($result[$key['value']] === false && !empty($data)) {
+												$result[$key['value']] = current($data)->value;
+										}
+								}else{
+										$result[$key['value']] = [];
+								}
+						}
+				}
+				return $result;
 
-        return false;
-    }
+		}
 
-    /**
+		/**
+		 * @param $uri
+		 * @param string $lang
+		 * @return String
+		 */
+		public function dbPediaLabel($conf,$uri, $lang = 'en')
+		{
+				$dataComplete = $this->dbpedia($uri);
+				$label = "";
+				if ($dataComplete) {
+						//$key  = 'http://www.w3.org/2000/01/rdf-schema#label';
+						foreach ($conf['label'] as $predicat){
+								$data = $dataComplete->$predicat;
+								// Expected lang.
+								$result = $this->dbPediaLabelSearch($data, $lang);
+								//dump($result);exit;
+
+								// English.
+								if ($result === false && $lang !== 'en') {
+										$result = $this->dbPediaLabelSearch($data, $lang);
+								}
+								// First value.
+								if ($result === false && !empty($data)) {
+										$result = current($data)->value;
+								}
+								$label .= $result . " ";
+						}
+
+						return $label;
+				}
+
+				return $label;
+		}
+
+		/**
+		 * @param $data
+		 * @param $lang
+		 * @return mixed
+		 */
+		public function dbPediaLabelSearch($data, $lang)
+		{
+				foreach ($data as $item) {
+						if (array_key_exists('lang', $item) && $item->lang === $lang) {
+								return $item->value;
+						}
+				}
+				return false;
+		}
+
+
+		/**
      * @param $tab
      * @return array
      */
