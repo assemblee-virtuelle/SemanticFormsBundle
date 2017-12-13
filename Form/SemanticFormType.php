@@ -274,6 +274,7 @@ abstract class SemanticFormType extends AbstractType
                     break;
 								// adresse
 								case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
+								case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
 										$output = [];
 										$values = json_decode($values, JSON_OBJECT_AS_ARRAY);
 										if (is_array($values)) {
@@ -340,7 +341,8 @@ abstract class SemanticFormType extends AbstractType
             case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
 						// DbPedia
             case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
-                // Keep only links.
+						case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
+								// Keep only links.
                 return is_array($values) ? json_encode(
                   array_values($values),
                   JSON_OBJECT_AS_ARRAY
