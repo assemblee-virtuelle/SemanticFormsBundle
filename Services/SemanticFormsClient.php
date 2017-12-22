@@ -17,16 +17,16 @@ class SemanticFormsClient
     //var $baseUrlForm = 'http://assemblee-virtuelle.github.io/grands-voisins-v2/gv-forms.ttl#';
     var $cookieName = 'cookie.txt';
     var $prefixes = [
-      'xsd'   => '<http://www.w3.org/2001/XMLSchema#>',
-      'fn'    => '<http://www.w3.org/2005/xpath-functions#>',
-      'text'  => '<http://jena.apache.org/text#>',
-      'rdf'   => '<http://www.w3.org/1999/02/22-rdf-syntax-ns#>',
-      'rdfs'  => '<http://www.w3.org/2000/01/rdf-schema#>',
-      'foaf'  => '<http://xmlns.com/foaf/0.1/>',
-      'purl'  => '<http://purl.org/dc/elements/1.1/>',
-      'event' => '<http://purl.org/NET/c4dm/event.owl#>',
-      'fipa'  => '<http://www.fipa.org/schemas#>',
-      'skos'  => '<http://www.w3.org/2004/02/skos/core#>',
+        'xsd'   => '<http://www.w3.org/2001/XMLSchema#>',
+        'fn'    => '<http://www.w3.org/2005/xpath-functions#>',
+        'text'  => '<http://jena.apache.org/text#>',
+        'rdf'   => '<http://www.w3.org/1999/02/22-rdf-syntax-ns#>',
+        'rdfs'  => '<http://www.w3.org/2000/01/rdf-schema#>',
+        'foaf'  => '<http://xmlns.com/foaf/0.1/>',
+        'purl'  => '<http://purl.org/dc/elements/1.1/>',
+        'event' => '<http://purl.org/NET/c4dm/event.owl#>',
+        'fipa'  => '<http://www.fipa.org/schemas#>',
+        'skos'  => '<http://www.w3.org/2004/02/skos/core#>',
     ];
     var $prefixesCompiled = '';
 
@@ -44,11 +44,11 @@ class SemanticFormsClient
      * @param $baseUrlForm
      */
     public function __construct(
-      $domain,
-      $login,
-      $password,
-      $timeout,
-      $prefixes = []
+        $domain,
+        $login,
+        $password,
+        $timeout,
+        $prefixes = []
     ) {
 
         $this->domain        = $domain;
@@ -68,12 +68,12 @@ class SemanticFormsClient
     public function buildClient($cookie = "")
     {
         return new Client(
-          [
-            'base_uri'        => 'http://'.$this->domain,
-            'timeout'         => $this->timeout,
-            'allow_redirects' => true,
-            'cookies'         => $cookie,
-          ]
+            [
+                'base_uri'        => 'http://'.$this->domain,
+                'timeout'         => $this->timeout,
+                'allow_redirects' => true,
+                'cookies'         => $cookie,
+            ]
         );
     }
 
@@ -90,9 +90,9 @@ class SemanticFormsClient
 
         try {
             $response = $client->request(
-              'POST',
-              $path,
-              $options
+                'POST',
+                $path,
+                $options
             );
 
             return $response;
@@ -118,17 +118,17 @@ class SemanticFormsClient
 
         $options['headers'] = [
             // Sign request.
-          'User-Agent'      => 'SemanticFormsClient',
+            'User-Agent'      => 'SemanticFormsClient',
             // Ensure to get JSON response.
-          'Accept'          => 'application/json',
-          'Accept-Language' => 'fr',
+            'Accept'          => 'application/json',
+            'Accept-Language' => 'fr',
         ];
 
         try {
             $response = $client->request(
-              'GET',
-              $path,
-              $options
+                'GET',
+                $path,
+                $options
             );
 
             return $response->getBody();
@@ -231,35 +231,35 @@ class SemanticFormsClient
     public function lookup($term, $class = false)
     {
         return json_decode(
-          $this->get(
-            '/lookup',
-            [
-              'query' => [
-                'QueryString' => $term,
-                'QueryClass'  => $class ? $class : '',
-              ],
-            ]
-          )
+            $this->get(
+                '/lookup',
+                [
+                    'query' => [
+                        'QueryString' => $term,
+                        'QueryClass'  => $class ? $class : '',
+                    ],
+                ]
+            )
         );
     }
 
-		/**
-		 * @param $term
-		 * @return mixed
-		 */
-		public function import($term)
-		{
-				return json_decode(
-					$this->get(
-						'/display',
-						[
-							'query' => [
-								'displayuri' => $term,
-							],
-						]
-					)
-				);
-		}
+    /**
+     * @param $term
+     * @return mixed
+     */
+    public function import($term)
+    {
+        return json_decode(
+            $this->get(
+                '/display',
+                [
+                    'query' => [
+                        'displayuri' => $term,
+                    ],
+                ]
+            )
+        );
+    }
     /**
      * @param $specType
      * @return array
@@ -270,12 +270,12 @@ class SemanticFormsClient
     public function createData($specType)
     {
         return $this->getJSON(
-          '/create-data',
-          [
-            'query' => [
-              'uri' => $specType,
-            ],
-          ]
+            '/create-data',
+            [
+                'query' => [
+                    'uri' => $specType,
+                ],
+            ]
         );
     }
 
@@ -290,13 +290,13 @@ class SemanticFormsClient
     public function formData($uri, $specType)
     {
         return $this->getJSON(
-          '/form-data',
-          [
-            'query' => [
-              'displayuri' => $uri,
-              'formuri'    => $specType,
-            ],
-          ]
+            '/form-data',
+            [
+                'query' => [
+                    'displayuri' => $uri,
+                    'formuri'    => $specType,
+                ],
+            ]
         );
     }
 
@@ -375,16 +375,16 @@ class SemanticFormsClient
      * @param string $rdfType
      */
     public function tripletSet(
-      &$destination,
-      $subject,
-      $type,
-      $value,
-      $rdfType = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+        &$destination,
+        $subject,
+        $type,
+        $value,
+        $rdfType = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
     ) {
         $destination[urlencode(
-          "<".$subject."> <".$rdfType."> <".
-          $type.
-          ">."
+            "<".$subject."> <".$rdfType."> <".
+            $type.
+            ">."
         )] = $value;
     }
 
@@ -398,120 +398,121 @@ class SemanticFormsClient
 
         // All properties about organization.
         $response =
-          $this
-            ->sparql(
-              'SELECT ?P ?O WHERE { GRAPH ?G { ?S ?P ?O .  <'.$uri.'> ?P ?O }} GROUP BY ?P ?O'
-            );
+            $this
+                ->sparql(
+                    'SELECT ?G ?P ?O WHERE { GRAPH ?G { ?S ?P ?O .  <'.$uri.'> ?P ?O }} GROUP BY ?G ?P ?O'
+                );
 
         $output = [
-          'uri' => $uri,
+            'uri' => $uri,
+            'graph' => [],
         ];
-
         foreach ($response['results']['bindings'] as $item) {
+            array_push($output['graph'],$item['G']['value']);
             $key = $item['P']['value'];
             if (!isset($output[$key])) {
                 $output[$key] = [];
             }
             $output[$key][] = $item['O']['value'];
         }
-
+        $output['graph'] = array_unique($output['graph']);
         return $output;
     }
 
-		private function dbpedia($uri){
-				$options            = ['verify' => false];
-				$options['headers'] = [
-						// Sign request.
-					'User-Agent'      => 'SemanticFormsClient',
-						// Ensure to get JSON response.
-					'Accept'          => 'application/json',
-					'Accept-Language' => 'fr',
-				];
+    private function dbpedia($uri){
+        $options            = ['verify' => false];
+        $options['headers'] = [
+            // Sign request.
+            'User-Agent'      => 'SemanticFormsClient',
+            // Ensure to get JSON response.
+            'Accept'          => 'application/json',
+            'Accept-Language' => 'fr',
+        ];
 
-				$data = json_decode($this->get($uri, $options));
-				return $data->$uri;
+        $data = json_decode($this->get($uri, $options));
+        return $data->$uri;
 
-		}
+    }
 
-		public function dbpediaDetail($conf,$uri, $lang = 'en'){
-				$dataComplete = $this->dbpedia($uri);
-				$result = [];
-				if ($dataComplete) {
-						foreach ($conf['fields'] as $predicat =>$key){
-								if(array_key_exists($predicat,$dataComplete)){
-										$data = $dataComplete->$predicat;
-										// Expected lang.
-										$result[$key['value']] = $this->dbPediaLabelSearch($data, $lang);
-										//dump($result);exit;
+    public function dbpediaDetail($conf,$uri, $lang = 'en'){
+        $dataComplete = $this->dbpedia($uri);
+        $result = [];
+        if ($dataComplete) {
+            foreach ($conf['fields'] as $predicat =>$key){
+                if(array_key_exists($predicat,$dataComplete)){
+                    $data = $dataComplete->$predicat;
+                    // Expected lang.
+                    $result[$key['value']] = $this->dbPediaLabelSearch($data, $lang);
+                    //dump($result);exit;
 
-										// English.
-										if ($result[$key['value']] === false && $lang !== 'en') {
-												$result[$key['value']] = $this->dbPediaLabelSearch($data, 'en');
-										}
-										// First value.
-										if ($result[$key['value']] === false && !empty($data)) {
-												$result[$key['value']] = current($data)->value;
-										}
-								}else{
-										$result[$key['value']] = [];
-								}
-						}
-				}
-				return $result;
+                    // English.
+                    if ($result[$key['value']] === false && $lang !== 'en') {
+                        $result[$key['value']] = $this->dbPediaLabelSearch($data, 'en');
+                    }
+                    // First value.
+                    if ($result[$key['value']] === false && !empty($data)) {
+                        $result[$key['value']] = current($data)->value;
+                    }
+                }else{
+                    $result[$key['value']] = [];
+                }
+            }
+        }
+        return $result;
 
-		}
+    }
 
-		/**
-		 * @param $uri
-		 * @param string $lang
-		 * @return String
-		 */
-		public function dbPediaLabel($conf,$uri, $lang = 'en')
-		{
-				$dataComplete = $this->dbpedia($uri);
-				$label = "";
-				if ($dataComplete) {
-						//$key  = 'http://www.w3.org/2000/01/rdf-schema#label';
-						foreach ($conf['label'] as $predicat){
-								$data = $dataComplete->$predicat;
-								// Expected lang.
-								$result = $this->dbPediaLabelSearch($data, $lang);
-								//dump($result);exit;
+    /**
+     * @param $uri
+     * @param string $lang
+     * @return String
+     */
+    public function dbPediaLabel($conf,$uri, $lang = 'en')
+    {
+        $dataComplete = $this->dbpedia($uri);
+        $label = "";
+        if ($dataComplete) {
+            //$key  = 'http://www.w3.org/2000/01/rdf-schema#label';
+            foreach ($conf['label'] as $predicat){
+                $data = $dataComplete->$predicat;
+                // Expected lang.
+                $result = $this->dbPediaLabelSearch($data, $lang);
+                //dump($result);exit;
 
-								// English.
-								if ($result === false && $lang !== 'en') {
-										$result = $this->dbPediaLabelSearch($data, $lang);
-								}
-								// First value.
-								if ($result === false && !empty($data)) {
-										$result = current($data)->value;
-								}
-								$label .= $result . " ";
-						}
+                // English.
+                if ($result === false && $lang !== 'en') {
+                    $result = $this->dbPediaLabelSearch($data, $lang);
+                }
+                // First value.
+                if ($result === false && !empty($data)) {
+                    $result = current($data)->value;
+                }
+                $label .= $result . " ";
+            }
 
-						return $label;
-				}
+            return $label;
+        }
 
-				return $label;
-		}
+        return $label;
+    }
 
-		/**
-		 * @param $data
-		 * @param $lang
-		 * @return mixed
-		 */
-		public function dbPediaLabelSearch($data, $lang)
-		{
-				foreach ($data as $item) {
-						if (array_key_exists('lang', $item) && $item->lang === $lang) {
-								return $item->value;
-						}
-				}
-				return false;
-		}
+    /**
+     * @param $data
+     * @param $lang
+     * @return mixed
+     */
+    public function dbPediaLabelSearch($data, $lang)
+    {
+        foreach ($data as $item) {
+            if (array_key_exists('lang', $item) && $item->lang === $lang) {
+                return $item->value;
+            }
+        }
+        return false;
+    }
 
 
-		/**
+    /**
      * @param $tab
      * @return array
      */
