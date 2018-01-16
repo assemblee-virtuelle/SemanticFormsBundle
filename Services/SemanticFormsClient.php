@@ -430,7 +430,7 @@ class SemanticFormsClient
         ];
 
         $data = json_decode($this->get($uri, $options));
-        return $data->$uri;
+        return $data;
 
     }
 
@@ -438,6 +438,7 @@ class SemanticFormsClient
         $dataComplete = $this->dbpedia($uri);
         $result = [];
         if ($dataComplete) {
+            $dataComplete->$uri;
             foreach ($conf['fields'] as $predicat =>$key){
                 if(array_key_exists($predicat,$dataComplete)){
                     $data = $dataComplete->$predicat;
