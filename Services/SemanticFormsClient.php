@@ -471,8 +471,9 @@ class SemanticFormsClient
     public function dbPediaLabel($conf,$uri, $lang = 'en')
     {
         $dataComplete = $this->dbpedia($uri);
-        $label = "";
+        $label = null;
         if ($dataComplete) {
+            $dataComplete = $dataComplete->$uri;
             //$key  = 'http://www.w3.org/2000/01/rdf-schema#label';
             foreach ($conf['label'] as $predicat){
                 $data = $dataComplete->$predicat;
