@@ -28,16 +28,16 @@ abstract class SemanticFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(
-          array(
-            'client'   => '',
-            'login'    => '',
-            'password' => '',
-            'graphURI' => '',
-            'values'   => '',
-            'spec'     => '',
-            'role'     => '',
-            'sfConf'     => '',
-          )
+            array(
+                'client'   => '',
+                'login'    => '',
+                'password' => '',
+                'graphURI' => '',
+                'values'   => '',
+                'spec'     => '',
+                'role'     => '',
+                'sfConf'     => '',
+            )
         );
     }
 
@@ -57,19 +57,19 @@ abstract class SemanticFormType extends AbstractType
         // We have an uri (edit mode).
         if ($editMode) {
             $formSpecificationRaw = $client->formData(
-              $options['values'],
-              $options['spec']
+                $options['values'],
+                $options['spec']
             );
             $uri                  = $options['values'];
         } // Create mode.
         else {
             $formSpecificationRaw = $client->createData(
-              $options['spec']
+                $options['spec']
             );
             $uri                  = $formSpecificationRaw['subject'];
             if($graphURI == null ){
-            		$graphURI =  $formSpecificationRaw['subject'];
-						}
+                $graphURI =  $formSpecificationRaw['subject'];
+            }
         }
 
         $this->uri = $uri;
@@ -89,96 +89,195 @@ abstract class SemanticFormType extends AbstractType
             // Turn field value to array,
             // and use htmlName as key for eah value.
             if (!is_array($fieldSaved['value'])) {
-                $fieldSaved['value'] = [$fieldSaved['htmlName'] => $fieldSaved['value']];
+                $fieldSaved['value'] = [ $fieldSaved['value']];
             }
             // Push new value.
-            $fieldSaved['value'][$field['htmlName']] = $field['value'];
+            $fieldSaved['value'][] = $field['value'];
             // Html name is base on the value of field (not only the type)
             // So we remove it in case on multiple values.
+            $fieldSaved['value'] = array_filter(array_unique($fieldSaved['value']));
             unset($fieldSaved['htmlName']);
             // Save field.
             $formSpecification[$localHtmlName] = $fieldSaved;
         }
 
         $this->formSpecification = $formSpecification;
-//        print_r($this->formSpecification); exit;
+        //dump($this->formSpecification); //exit;
 
         // Manage form submission.
         $builder->addEventListener(
-          FormEvents::SUBMIT,
-          function (FormEvent $event) use (
-            $client,
-            $editMode,
-            $uri,
-            $login,
-            $password,
-            $graphURI,
-						$sfConf
-          ) {
-              $form = $event->getForm();
-              // Add uri for external usage.
-              $form->uri = $uri;
-              $type = current($this->formSpecification['type']['value']);
-              // Add required fields.
-              $saveData = [
-                'uri'      => $this->uri,
-                'url'      => $this->uri,
-                'graphURI' => $graphURI,
-              ];
-
-              //if (!$editMode) {
-                  // Required type.
-                  $saveData[$this->getDefaultHtmlName(
-                    'type'
-                  )] = $this->conf['type'];
-              //}
-                $subject = $this->uri;
-              foreach ($this->fieldsAdded as $localHtmlName) {
-                  $fieldSpec    = $this->formSpecification[$localHtmlName];
-                  $fieldEncoded = $this->fieldEncode(
-                    $fieldSpec['localType'],
-                    $form->get($localHtmlName)->getData(),
-                    $fieldSpec,
-                      $subject
-                  );
-                  foreach ($fieldEncoded as $htmlName => $value) {
-                      // Retrieve original html name from given name.
-                      $saveData[$htmlName] = (!$value ) ? "" : $value;
-                  }
-              }
-              //dump($saveData);//exit;
-              $client->send(
-                $saveData,
+            FormEvents::SUBMIT,
+            function (FormEvent $event) use (
+                $client,
+                $editMode,
+                $uri,
                 $login,
-                $password
-              );
-							$reverse = $sfConf['reverse'];
-							if(!is_null($reverse)){
-									$values = array();
-									foreach ($reverse as $key=>$elem){
-											$localHtmlName = $this->fieldsAliases[$key]['value'];
-											if (array_key_exists($elem,$values))
-													$values[$elem] = array_merge($values[$elem],json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY));
-											else
-													$values[$elem] = json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY);
+                $password,
+                $graphURI,
+                $sfConf
+            ) {
+                $form = $event->getForm();
+                // Add uri for external usage.
+                $form->uri = $uri;
+                $type = current($this->formSpecification['type']['value']);
+                // Add required fields.
+                //$client->auth($login , $password );
+                if (!$editMode) {
+                    // Required type.
+                    //dump("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
+                    $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
+                }
+                $arrayTest= [];
+                foreach ($this->fieldsAdded as $localHtmlName) {
+                    $fieldSpec    = $this->formSpecification[$localHtmlName];
+                    $arrayTest[$localHtmlName] = $this->getContentToUpdate(
+                        $fieldSpec['localType'],
+                        $form->get($localHtmlName)->getData(),
+                        $fieldSpec['value']
+                    );
+                }
+                $havetodelete = $havetoinsert= false;
+                //delete
+                $deleteQuery =$insertQuery= '';
+                foreach ($arrayTest as $localhtmlname => $content){
+                    //delete
+                    if($content['delete']){
+                        if(!$havetodelete){
+                            $deleteQuery = "DELETE DATA { GRAPH <".$graphURI.'> { ';
+                        }
+                        $havetodelete = true;
+                        foreach ($content['delete'] as $data => $type){
+                            $deleteQuery.= "<".$this->uri."> <".$this->formSpecification[$localhtmlname]["property"].'> ';
+                            if($type =="uri"){
+                                $deleteQuery.='<'.$data.'>. ';
+                            }
+                            else{
+                                $deleteQuery.='"'.$data.'". ';
 
-									}
-									$this->update($graphURI,$this->uri,$values,$client,$reverse);
-							}
-          }
+                            }
+
+                        }
+                    }
+                    //insert
+                    if($content['insert']){
+                        if(!$havetoinsert){
+                            $insertQuery = "INSERT DATA { GRAPH <".$graphURI.'> { ';
+                        }
+                        $havetoinsert = true;
+                        foreach ($content['insert'] as $data => $type){
+                            $insertQuery.= "<".$this->uri."> <".$this->formSpecification[$localhtmlname]["property"].'> ';
+                            if($type =="uri"){
+                                $insertQuery.='<'.$data.'>. ';
+                            }
+                            else{
+                                $insertQuery.='"'.$data.'". ';
+
+                            }
+                        }
+                    }
+                }
+                if($havetodelete){
+                    $deleteQuery .= "}}";
+                }
+                if($havetoinsert){
+                    $insertQuery .= "}}";
+                }
+                //dump($deleteQuery);
+                //dump($insertQuery);exit;
+                $client->update($deleteQuery);
+                $client->update($insertQuery);
+                $reverse = $sfConf['reverse'];
+                if(!is_null($reverse)){
+                    $values = array();
+                    foreach ($reverse as $key=>$elem){
+                        $localHtmlName = $this->fieldsAliases[$key]['value'];
+                        if (array_key_exists($elem,$values))
+                            $values[$elem] = array_merge($values[$elem],json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY));
+                        else
+                            $values[$elem] = json_decode($form->get($localHtmlName)->getData(),JSON_OBJECT_AS_ARRAY);
+
+                    }
+                    $this->update($graphURI,$this->uri,$values,$client,$reverse);
+                }
+            }
         );
+    }
+
+    private function getContentToUpdate($localtype,$dataSubmitted,$oldData){
+        $outputSingleValue = $dataSubmitted;
+        if ($dataSubmitted) {
+            switch ($localtype) {
+
+                // Date
+                case 'Symfony\Component\Form\Extension\Core\Type\DateType':
+                case 'Symfony\Component\Form\Extension\Core\Type\DateTimeType':
+                    /** @var $value \DateTime */
+                    $dataSubmitted = $dataSubmitted->format('Y-m-d H:i:s');
+                    break;
+
+                // Uri
+                case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
+                    // DbPedia
+                case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
+                    $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
+                    $insert = $delete = [];
+                    if (is_array($dataSubmitted)) {
+                        foreach (array_keys($dataSubmitted) as $data){
+                            if(!in_array($data,$oldData)){
+                                $insert[$data] ="uri";
+                            }
+                        }
+                        foreach ($oldData as $data){
+                            if(!array_key_exists($data,$dataSubmitted)){
+                                $delete[$data] ="uri";
+                            }
+                        }
+                    }
+
+                    return ['insert' => $insert, 'delete' => $delete];
+                    break;
+                // adresse
+                case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
+                case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
+                    $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
+                    $insert = $delete = [];
+                    if (is_array($dataSubmitted)) {
+                        foreach (array_keys($dataSubmitted) as $data){
+                            if(!in_array($data,$oldData)){
+                                $insert[$data] ="text";
+                            }
+                        }
+                        foreach ($oldData as $data){
+                            if(!array_key_exists($data,$dataSubmitted)){
+                                $delete[$data] ="text";
+                            }
+                        }
+                    }
+
+                    return ['insert' => $insert, 'delete' => $delete];
+                    break;
+            }
+        }
+
+        if(current($oldData) != $dataSubmitted){
+            return ['insert' => [$dataSubmitted => "text"]  , 'delete' => [current($oldData) => "text"]];
+        }
+        else{
+            return ['insert' => null , 'delete' => null];
+        }
+
     }
 
 
     public function add(
-      FormBuilderInterface $builder,
-      $localHtmlName,
-      $type = null,
-      $options = []
+        FormBuilderInterface $builder,
+        $localHtmlName,
+        $type = null,
+        $options = []
     ) {
         if (!isset($this->formSpecification[$localHtmlName])) {
             throw new Exception(
-              'Form field not found into specification '.$localHtmlName
+                'Form field not found into specification '.$localHtmlName
             );
         }
 
@@ -187,8 +286,8 @@ abstract class SemanticFormType extends AbstractType
             $options['label'] = $this->formSpecification[$localHtmlName]['label'];
             // Get value.
             $options['data']   = $this->fieldDecode(
-              $type,
-              $this->formSpecification[$localHtmlName]['value']
+                $type,
+                $this->formSpecification[$localHtmlName]['value']
             );
             $options['mapped'] = false;
         }
@@ -200,118 +299,21 @@ abstract class SemanticFormType extends AbstractType
         return $this;
     }
 
-		function buildHtmlName($subject, $predicate, $value,$test = false)
-		{
-
-				if($test){
-						return urlencode(
-						// Concatenate : <S> <P> <"O">.
-							'<'.implode('> <', [$subject, $predicate]).'> "'.$value.'"@en .'
-						);
-				}
-				else{
-						return urlencode(
-						// Concatenate : <S> <P> <"O">.
-							'<'.implode('> <', [$subject, $predicate, ''.$value.'']).'>.'
-						);
-				}
-		}
-
-    /**
-     * From front form to semantic forms.
-     */
-    public function fieldEncode($type, $values, $spec,$subject)
+    function buildHtmlName($subject, $predicate, $value,$test = false)
     {
-        $outputSingleValue = $values;
-        //dump($spec);
-        if ($values) {
-            switch ($type) {
 
-                // Date
-                case 'Symfony\Component\Form\Extension\Core\Type\DateType':
-                case 'Symfony\Component\Form\Extension\Core\Type\DateTimeType':
-                    /** @var $value \DateTime */
-                    $outputSingleValue = $values->format('Y-m-d H:i:s');
-                    break;
-
-                // Uri
-                case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
-                    // DbPedia
-                case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
-                    $output = [];
-                    $values = json_decode($values, JSON_OBJECT_AS_ARRAY);
-                    if (is_array($values)) {
-                        // Empty all previous values
-                        foreach ($spec['value'] as $value) {
-                            $htmlName          = $this->buildHtmlName(
-                              $subject,
-                              $spec['property'],
-                              $value
-                            );
-                            $output[$htmlName] = '';
-
-                        }
-                        //dump($values);
-                        $i=0;
-                        // Add new values.
-                        foreach (array_keys($values) as $value) {
-														if(!empty($value)) {
-																$htmlName = $this->buildHtmlName(
-																	$subject,
-																	$spec['property'],
-																	$i
-																);
-																$i++;
-																if (!is_integer($value))
-																		$output[$htmlName] = $value;
-																else
-																		$output[$htmlName] = $values[$value];
-														}
-												}
-                    }
-
-                    return $output;
-                    break;
-								// adresse
-								case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
-								case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
-										$output = [];
-										$values = json_decode($values, JSON_OBJECT_AS_ARRAY);
-										if (is_array($values)) {
-												// Empty all previous values
-												foreach ($spec['value'] as $value) {
-														$htmlName          = $this->buildHtmlName(
-															$subject,
-															$spec['property'],
-															$value,
-															true
-														);
-														$output[$htmlName] = '';
-
-												}
-												$i=0;
-												// Add new values.
-												foreach (array_keys($values) as $value) {
-														$htmlName          = $this->buildHtmlName(
-															$subject,
-															$spec['property'],
-															$i,
-															true
-														);
-														$i++;
-														$output[$htmlName] = $value;
-												}
-										}
-										return $output;
-										break;
-            }
+        if($test){
+            return urlencode(
+            // Concatenate : <S> <P> <"O">.
+                '<'.implode('> <', [$subject, $predicate]).'> "'.$value.'"@en .'
+            );
         }
-
-        // We have only one value for this field.
-        // So we take first htmlName and use it as key.
-        $htmlName = $this->getDefaultHtmlName($spec['localHtmlName']);
-
-        return [$htmlName => $outputSingleValue];
+        else{
+            return urlencode(
+            // Concatenate : <S> <P> <"O">.
+                '<'.implode('> <', [$subject, $predicate, ''.$value.'']).'>.'
+            );
+        }
     }
 
     /**
@@ -335,17 +337,17 @@ abstract class SemanticFormType extends AbstractType
             case 'Symfony\Component\Form\Extension\Core\Type\NumberType':
                 return (float) current($values);
 
-						// Uri
-						case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
-            // adresse
+            // Uri
+            case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
+                // adresse
             case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
-						// DbPedia
+                // DbPedia
             case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
-						case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
-								// Keep only links.
+            case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
+                // Keep only links.
                 return is_array($values) ? json_encode(
-                  array_values($values),
-                  JSON_OBJECT_AS_ARRAY
+                    array_values($values),
+                    JSON_OBJECT_AS_ARRAY
                 ) : [];
                 break;
         }
@@ -364,29 +366,24 @@ abstract class SemanticFormType extends AbstractType
         }
     }
 
-    function getDefaultHtmlName($localHtmlName)
-    {
-        return current(
-          array_keys($this->formSpecification[$localHtmlName]['value'])
-        );
-    }
 
     private function update($graph,$subject,$values,$sfClient,$reverse){
 
         //supprimer tous les précédent liens
         foreach ($reverse as $key=>$elem){
-						$query="DELETE { GRAPH ?gr { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE { GRAPH ?gr { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." .}}";
+            $query="DELETE { GRAPH ?gr { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE { GRAPH ?gr { ?s <".$elem."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." .}}";
             $sfClient->update($query);
         }
         //loop sur les nouveaux liens
-
         foreach ($values as $predicat=>$elems){
-						foreach ($elems as $link=>$elem){
-								if (!is_integer($link)){
-										$query="INSERT { GRAPH ?GR { <".$link."> <".$predicat."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE {GRAPH ?GR { <".$link."> ?p ?o .}}";
-										$sfClient->update($query);
-								}
-						}
+            if($elems){
+                foreach ($elems as $link=>$elem){
+                    if (!is_integer($link)){
+                        $query="INSERT { GRAPH ?GR { <".$link."> <".$predicat."> ".$sfClient->formatValue(SemanticFormsClient::VALUE_TYPE_URI,$subject)." . }} WHERE {GRAPH ?GR { <".$link."> ?p ?o .}}";
+                        $sfClient->update($query);
+                    }
+                }
+            }
         }
     }
 }
