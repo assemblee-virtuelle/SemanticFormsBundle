@@ -122,11 +122,11 @@ abstract class SemanticFormType extends AbstractType
                 $type = current($this->formSpecification['type']['value']);
                 // Add required fields.
                 //$client->auth($login , $password );
-                if (!$editMode) {
-                    // Required type.
-                    //dump("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
-                    $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
-                }
+                //if (!$editMode) {
+                // Required type.
+                //dump("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
+                $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['type'].">.}}");
+                //}
                 $arrayTest= [];
                 foreach ($this->fieldsAdded as $localHtmlName) {
                     $fieldSpec    = $this->formSpecification[$localHtmlName];
@@ -170,7 +170,7 @@ abstract class SemanticFormType extends AbstractType
                                 $insertQuery.='<'.$data.'>. ';
                             }
                             else{
-                                $insertQuery.='"'.$data.'". ';
+                                $insertQuery.='"""'.$data.'""". ';
 
                             }
                         }
