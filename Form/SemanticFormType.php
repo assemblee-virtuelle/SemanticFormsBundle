@@ -71,7 +71,6 @@ abstract class SemanticFormType extends AbstractType
                 $graphURI =  $formSpecificationRaw['subject'];
             }
         }
-
         $this->uri = $uri;
         // Create from specification.
         $formSpecification = [];
@@ -128,6 +127,7 @@ abstract class SemanticFormType extends AbstractType
                 $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['type'].">.}}");
                 //}
                 $arrayTest= [];
+
                 foreach ($this->fieldsAdded as $localHtmlName) {
                     $fieldSpec    = $this->formSpecification[$localHtmlName];
                     $arrayTest[$localHtmlName] = $this->getContentToUpdate(
@@ -139,11 +139,13 @@ abstract class SemanticFormType extends AbstractType
                 $havetodelete = $havetoinsert= false;
                 //delete
                 $deleteQuery =$insertQuery= '';
+
                 foreach ($arrayTest as $localhtmlname => $content){
+
                     //delete
                     if($content['delete']){
                         if(!$havetodelete){
-                            $deleteQuery = "DELETE DATA { GRAPH <".$graphURI.'> { ';
+                            $deleteQuery = "DELETE { GRAPH <".$graphURI.'> { ';
                         }
                         $havetodelete = true;
                         foreach ($content['delete'] as $data => $type){
@@ -152,8 +154,7 @@ abstract class SemanticFormType extends AbstractType
                                 $deleteQuery.='<'.$data.'>. ';
                             }
                             else{
-                                $deleteQuery.='"'.$data.'". ';
-
+                                $deleteQuery.='?o.';
                             }
 
                         }
@@ -177,7 +178,7 @@ abstract class SemanticFormType extends AbstractType
                     }
                 }
                 if($havetodelete){
-                    $deleteQuery .= "}}";
+                    $deleteQuery .= "}} WHERE { GRAPH <".$graphURI."> { <".$this->uri."> ?P ?o }} ";
                 }
                 if($havetoinsert){
                     $insertQuery .= "}}";
@@ -204,7 +205,10 @@ abstract class SemanticFormType extends AbstractType
     }
 
     private function getContentToUpdate($localtype,$dataSubmitted,$oldData){
-        $outputSingleValue = $dataSubmitted;
+        //$outputSingleValue = $dataSubmitted;
+        //dump($dataSubmitted);
+
+
         if ($dataSubmitted) {
             switch ($localtype) {
 
@@ -219,19 +223,25 @@ abstract class SemanticFormType extends AbstractType
                 case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
                     // DbPedia
                 case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
-                    $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
+
+                    if(json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY))
+                        $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
                     $insert = $delete = [];
                     if (is_array($dataSubmitted)) {
                         foreach (array_keys($dataSubmitted) as $data){
-                            if(!in_array($data,$oldData)){
-                                $insert[$data] ="uri";
-                            }
+                            // if(!in_array($data,$oldData)){
+                            $insert[$data] ="uri";
+                            // }
                         }
-                        foreach ($oldData as $data){
-                            if(!array_key_exists($data,$dataSubmitted)){
-                                $delete[$data] ="uri";
-                            }
-                        }
+
+                    }else{
+                        if(!strstr($dataSubmitted,"[]"))
+                            $insert[$dataSubmitted] ="uri";
+                    }
+                    foreach ($oldData as $data){
+                        //if(!array_key_exists($data,$dataSubmitted)){
+                        $delete[$data] ="text";
+                        //}
                     }
 
                     return ['insert' => $insert, 'delete' => $delete];
@@ -239,28 +249,36 @@ abstract class SemanticFormType extends AbstractType
                 // adresse
                 case 'VirtualAssembly\SemanticFormsBundle\Form\AdresseType':
                 case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
-                    $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
+                    if(json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY))
+                        $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
                     $insert = $delete = [];
                     if (is_array($dataSubmitted)) {
                         foreach (array_keys($dataSubmitted) as $data){
-                            if(!in_array($data,$oldData)){
-                                $insert[$data] ="text";
-                            }
+                            // if(!in_array($data,$oldData)){
+                            $insert[$data] ="text";
+                            // }
                         }
-                        foreach ($oldData as $data){
-                            if(!array_key_exists($data,$dataSubmitted)){
-                                $delete[$data] ="text";
-                            }
-                        }
-                    }
 
+                    }else{
+                        if(!strstr($dataSubmitted,"{}"))
+                            $insert[$dataSubmitted] ="text";
+                    }
+                    foreach ($oldData as $data){
+                        //if(!array_key_exists($data,$dataSubmitted)){
+                        $delete[$data] ="text";
+                        //}
+                    }
                     return ['insert' => $insert, 'delete' => $delete];
                     break;
             }
         }
 
         if(current($oldData) != $dataSubmitted){
-            return ['insert' => [$dataSubmitted => "text"]  , 'delete' => [current($oldData) => "text"]];
+            $removeOldData = [];
+            foreach ($oldData as $data){
+                $removeOldData[$data] = 'text';
+            }
+            return ['insert' => [$dataSubmitted => "text"]  , 'delete' => $removeOldData];
         }
         else{
             return ['insert' => null , 'delete' => null];
@@ -353,7 +371,7 @@ abstract class SemanticFormType extends AbstractType
         }
 
         // We take the last version of the value.
-        return end($values);
+        return current($values);
     }
 
 
