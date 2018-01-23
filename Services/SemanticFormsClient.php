@@ -440,8 +440,8 @@ class SemanticFormsClient
         if ($dataComplete) {
             $dataComplete->$uri;
             foreach ($conf['fields'] as $predicat =>$key){
-                if(array_key_exists($predicat,$dataComplete)){
-                    $data = $dataComplete->$predicat;
+                if(array_key_exists($predicat,$dataComplete->$uri)){
+                    $data = $dataComplete->$uri->$predicat;
                     // Expected lang.
                     $result[$key['value']] = $this->dbPediaLabelSearch($data, $lang);
                     //dump($result);exit;
@@ -460,7 +460,6 @@ class SemanticFormsClient
             }
         }
         return $result;
-
     }
 
     /**
