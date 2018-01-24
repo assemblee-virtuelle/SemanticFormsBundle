@@ -166,13 +166,14 @@ abstract class SemanticFormType extends AbstractType
                         }
                         $havetoinsert = true;
                         foreach ($content['insert'] as $data => $type){
-                            $insertQuery.= "<".$this->uri."> <".$this->formSpecification[$localhtmlname]["property"].'> ';
-                            if($type =="uri"){
-                                $insertQuery.='<'.$data.'>. ';
-                            }
-                            else{
-                                $insertQuery.='"""'.$data.'""". ';
+                            if($data && !strstr($data,"{}") && !strstr($data,"[]")) {
+                                $insertQuery .= "<" . $this->uri . "> <" . $this->formSpecification[$localhtmlname]["property"] . '> ';
+                                if ($type == "uri") {
+                                    $insertQuery .= '<' . $data . '>. ';
+                                } else {
+                                    $insertQuery .= '"""' . $data . '""". ';
 
+                                }
                             }
                         }
                     }
@@ -235,8 +236,7 @@ abstract class SemanticFormType extends AbstractType
                         }
 
                     }else{
-                        if(!strstr($dataSubmitted,"[]"))
-                            $insert[$dataSubmitted] ="uri";
+                        $insert[$dataSubmitted] ="uri";
                     }
                     foreach ($oldData as $data){
                         //if(!array_key_exists($data,$dataSubmitted)){
@@ -260,8 +260,7 @@ abstract class SemanticFormType extends AbstractType
                         }
 
                     }else{
-                        if(!strstr($dataSubmitted,"{}"))
-                            $insert[$dataSubmitted] ="text";
+                        $insert[$dataSubmitted] ="text";
                     }
                     foreach ($oldData as $data){
                         //if(!array_key_exists($data,$dataSubmitted)){
