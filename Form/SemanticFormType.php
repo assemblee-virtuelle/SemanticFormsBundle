@@ -177,7 +177,7 @@ abstract class SemanticFormType extends AbstractType
                         foreach ($predicatArray as $predicat){
                             foreach ($content['insert'] as $data => $type){
                                 if($data && !strstr($data,"{}") && !strstr($data,"[]")) {
-                                    $insertQuery .= "<" . $this->uri . "> <" . $this->formSpecification[$localhtmlname]["property"] . '> ';
+                                    $insertQuery .= "<" . $this->uri . "> <" . $predicat . '> ';
                                     if ($type == "uri") {
                                         $insertQuery .= '<' . $data . '>. ';
                                     } else {
