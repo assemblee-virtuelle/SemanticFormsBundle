@@ -124,7 +124,12 @@ abstract class SemanticFormType extends AbstractType
                 //if (!$editMode) {
                 // Required type.
                 //dump("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
-                $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['type'].">.}}");
+                if(is_array($sfConf['type'])){
+                    foreach ($sfConf['type'] as $type)
+                        $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
+                }else{
+                    $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['type'].">.}}");
+                }
                 //}
                 $arrayTest= [];
 
@@ -141,6 +146,11 @@ abstract class SemanticFormType extends AbstractType
                 $deleteQuery =$insertQuery= '';
 
                 foreach ($arrayTest as $localhtmlname => $content){
+                    $mainPredicat = $this->formSpecification[$localhtmlname]["property"];
+                    $predicatArray = [$mainPredicat];
+                    if(array_key_exists('otherPredicat',$sfConf['fields'][$mainPredicat]) && $sfConf['fields'][$mainPredicat]['otherPredicat'] ){
+                        $predicatArray = array_merge($predicatArray,$sfConf['fields'][$mainPredicat]['otherPredicat']);
+                    }
 
                     //delete
                     if($content['delete']){
@@ -148,15 +158,16 @@ abstract class SemanticFormType extends AbstractType
                             $deleteQuery = "DELETE { GRAPH <".$graphURI.'> { ';
                         }
                         $havetodelete = true;
-                        foreach ($content['delete'] as $data => $type){
-                            $deleteQuery.= "<".$this->uri."> <".$this->formSpecification[$localhtmlname]["property"].'> ';
-                            if($type =="uri"){
-                                $deleteQuery.='<'.$data.'>. ';
+                        foreach ($predicatArray as $predicat){
+                            foreach ($content['delete'] as $data => $type){
+                                $deleteQuery.= "<".$this->uri."> <".$predicat.'> ';
+                                if($type =="uri"){
+                                    $deleteQuery.='<'.$data.'>. ';
+                                }
+                                else{
+                                    $deleteQuery.='?o.';
+                                }
                             }
-                            else{
-                                $deleteQuery.='?o.';
-                            }
-
                         }
                     }
                     //insert
@@ -165,14 +176,16 @@ abstract class SemanticFormType extends AbstractType
                             $insertQuery = "INSERT DATA { GRAPH <".$graphURI.'> { ';
                         }
                         $havetoinsert = true;
-                        foreach ($content['insert'] as $data => $type){
-                            if($data && !strstr($data,"{}") && !strstr($data,"[]")) {
-                                $insertQuery .= "<" . $this->uri . "> <" . $this->formSpecification[$localhtmlname]["property"] . '> ';
-                                if ($type == "uri") {
-                                    $insertQuery .= '<' . $data . '>. ';
-                                } else {
-                                    $insertQuery .= '"""' . $data . '""". ';
+                        foreach ($predicatArray as $predicat){
+                            foreach ($content['insert'] as $data => $type){
+                                if($data && !strstr($data,"{}") && !strstr($data,"[]")) {
+                                    $insertQuery .= "<" . $this->uri . "> <" . $this->formSpecification[$localhtmlname]["property"] . '> ';
+                                    if ($type == "uri") {
+                                        $insertQuery .= '<' . $data . '>. ';
+                                    } else {
+                                        $insertQuery .= '"""' . $data . '""". ';
 
+                                    }
                                 }
                             }
                         }
