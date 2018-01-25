@@ -118,17 +118,15 @@ abstract class SemanticFormType extends AbstractType
                 $form = $event->getForm();
                 // Add uri for external usage.
                 $form->uri = $uri;
-                $type = current($this->formSpecification['type']['value']);
-                // Add required fields.
-                //$client->auth($login , $password );
-                //if (!$editMode) {
-                // Required type.
-                //dump("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
-                if(is_array($sfConf['type'])){
-                    foreach ($sfConf['type'] as $type)
-                        $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
-                }else{
-                    $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['type'].">.}}");
+                $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['type'].">.}}");
+
+                if (array_key_exists('otherType',$sfConf)){
+                    if(is_array($sfConf['otherType'])){
+                        foreach ($sfConf['otherType'] as $type)
+                            $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$type.">.}}");
+                    }else{
+                        $client->update("INSERT DATA { GRAPH <".$graphURI."> { <".$this->uri ."> <".self::FIELD_ALIAS_TYPE."> <".$sfConf['otherType'].">.}}");
+                    }
                 }
                 //}
                 $arrayTest= [];
