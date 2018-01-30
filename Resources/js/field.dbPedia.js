@@ -5,7 +5,7 @@ class VirtualAssemblyFieldDbPedia extends VirtualAssemblyFieldUri {
         for (let result of data.results) {
             items.push({
                 id: result.uri,
-                text: result.label + " --> " +  result.description
+                text: result.label + " --> " +  result.description.substr(0,80)+'...',
             });
             this.selectValues[result.uri] = result.label;
         }
