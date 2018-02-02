@@ -235,8 +235,10 @@ abstract class SemanticFormType extends AbstractType
                 case 'VirtualAssembly\SemanticFormsBundle\Form\UriType':
                     // DbPedia
                 case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
+                case 'VirtualAssembly\SemanticFormsBundle\Form\ThesaurusType':
 
-                    if(json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY))
+
+                if(json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY))
                         $dataSubmitted = json_decode($dataSubmitted, JSON_OBJECT_AS_ARRAY);
                     $insert = $delete = [];
                     if (is_array($dataSubmitted)) {
@@ -372,6 +374,8 @@ abstract class SemanticFormType extends AbstractType
                 // DbPedia
             case 'VirtualAssembly\SemanticFormsBundle\Form\DbPediaType':
             case 'VirtualAssembly\SemanticFormsBundle\Form\MultipleType':
+            case 'VirtualAssembly\SemanticFormsBundle\Form\ThesaurusType':
+
                 // Keep only links.
                 return is_array($values) ? json_encode(
                     array_values($values),

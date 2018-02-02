@@ -28,6 +28,7 @@ class UriType extends AbstractType
             'rdfType' => $options['rdfType'],
             'labelUrl' => $options['labelUrl'],
             'lookupUrl' => $options['lookupUrl'],
+             'graphUri' => $options['graphUri'],
           )
         );
     }
@@ -39,6 +40,7 @@ class UriType extends AbstractType
             'rdfType' => false,
             'labelUrl' => '',
             'lookupUrl' => 'http://lookup.dbpedia.org/api/search.asmx/PrefixSearch',
+            'graphUri' => null,
             //'lookupUrl' => 'http://lookup.dbpedia.org/api/search.asmx/KeywordSearch',
           )
         );
