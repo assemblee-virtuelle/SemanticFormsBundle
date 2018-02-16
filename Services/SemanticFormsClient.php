@@ -442,17 +442,27 @@ class SemanticFormsClient
             foreach ($conf['fields'] as $predicat =>$key){
                 if(array_key_exists($predicat,$dataComplete->$uri)){
                     $data = $dataComplete->$uri->$predicat;
-                    // Expected lang.
-                    $result[$key['value']] = $this->dbPediaLabelSearch($data, $lang);
-                    //dump($result);exit;
+                    if(array_key_exists('type',$key) && $key['type'] == 'uri' ){
+                        foreach ($data as $content){
+                            $result[$key['value']][$content->value] = $this->dbPediaLabel($conf,$content->value,$lang);
+                        }
+                    }elseif (array_key_exists('type',$key) && $key['type'] == 'autre'){
+                        foreach ($data as $content){
+                            $result[$key['value']][] =$content->value;
+                        }
+                    }else{
+                        // Expected lang.
+                        $result[$key['value']] = $this->dbPediaLabelSearch($data, $lang);
+                        //dump($result);exit;
 
-                    // English.
-                    if ($result[$key['value']] === false && $lang !== 'en') {
-                        $result[$key['value']] = $this->dbPediaLabelSearch($data, 'en');
-                    }
-                    // First value.
-                    if ($result[$key['value']] === false && !empty($data)) {
-                        $result[$key['value']] = current($data)->value;
+                        // English.
+                        if ($result[$key['value']] === false && $lang !== 'en') {
+                            $result[$key['value']] = $this->dbPediaLabelSearch($data, 'en');
+                        }
+                        // First value.
+                        if ($result[$key['value']] === false && !empty($data)) {
+                            $result[$key['value']] = current($data)->value;
+                        }
                     }
                 }else{
                     $result[$key['value']] = [];
