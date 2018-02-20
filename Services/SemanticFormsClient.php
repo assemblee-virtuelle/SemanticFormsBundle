@@ -349,17 +349,19 @@ class SemanticFormsClient
      *
      * @param $results
      *
-     * @return array
+     * @param null $uriKey => clé pour remplacer l'index par défaut ( uri de la ressource par exemple )
+     * @return array => les data a transformer
      */
-    public function sparqlResultsValues($results)
+    public function sparqlResultsValues($results,$uriKey =null)
     {
         $resultsFiltered = [];
         foreach ($results['results']['bindings'] as $index => $result) {
+            $key = ($uriKey)? $result[$uriKey]['value'] : $index;
             $item = [];
             foreach ($result as $fieldName => $data) {
                 $item[$fieldName] = $data['value'];
             }
-            $resultsFiltered[$index] = $item;
+            $resultsFiltered[$key] = $item;
         }
 
         return $resultsFiltered;
