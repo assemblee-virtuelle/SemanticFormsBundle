@@ -115,6 +115,7 @@ abstract class SemanticFormType extends AbstractType
                 $graphURI,
                 $sfConf
             ) {
+                $client->auth($login,$password);
                 $form = $event->getForm();
                 // Add uri for external usage.
                 $form->uri = $uri;
