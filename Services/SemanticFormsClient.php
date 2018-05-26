@@ -61,6 +61,10 @@ class SemanticFormsClient
         }
     }
 
+    public function getDomain(){
+        return $this->domain;
+    }
+
     /**
      * @param string $cookie
      * @return Client

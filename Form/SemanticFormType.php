@@ -8,7 +8,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use VirtualAssembly\SemanticFormsBundle\SemanticFormsBundle;
 use VirtualAssembly\SemanticFormsBundle\Services\SemanticFormsClient;
 
 abstract class SemanticFormType extends AbstractType
@@ -54,54 +53,33 @@ abstract class SemanticFormType extends AbstractType
         $this->fieldsAliases = $sfConf['fields'];
         $this->conf = $sfConf;
 
+        $data = [];
         // We have an uri (edit mode).
         if ($editMode) {
-            $formSpecificationRaw = $client->formData(
-                $options['values'],
-                $options['spec']
-            );
+            $data = $client->uriProperties($options['values']);
             $uri                  = $options['values'];
         } // Create mode.
         else {
-            $formSpecificationRaw = $client->createData(
-                $options['spec']
-            );
-            $uri                  = $formSpecificationRaw['subject'];
+            $uri = 'http://'.$client->getDomain() . "/ldp/" . random_int(1000000000,9999999999) .'-' . random_int(1000000000,9999999999);
             if($graphURI == null ){
-                $graphURI =  $formSpecificationRaw['subject'];
+                $graphURI =  $uri;
             }
         }
         $this->uri = $uri;
         // Create from specification.
-        $formSpecification = [];
-        foreach ($formSpecificationRaw['fields'] as $field) {
-            $localHtmlName = $this->getLocalHtmlName($field['property']);
-            // First value of this type of field.
-            if (!isset($formSpecification[$localHtmlName])) {
-                // Save into field spec.
-                $field['localHtmlName'] = $localHtmlName;
-                // Register with name as key.
-                $formSpecification[$localHtmlName] = $field;
-            }
-            // Manage multiple fields.
-            $fieldSaved = $formSpecification[$localHtmlName];
-            // Turn field value to array,
-            // and use htmlName as key for eah value.
-            if (!is_array($fieldSaved['value'])) {
-                $fieldSaved['value'] = [ $fieldSaved['value']];
-            }
-            // Push new value.
-            $fieldSaved['value'][] = $field['value'];
-            // Html name is base on the value of field (not only the type)
-            // So we remove it in case on multiple values.
-            $fieldSaved['value'] = array_filter(array_unique($fieldSaved['value']));
-            unset($fieldSaved['htmlName']);
-            // Save field.
-            $formSpecification[$localHtmlName] = $fieldSaved;
+        $newFormSpec = [];
+        foreach($this->fieldsAliases as $key=>$field){
+            $newFormSpec[$field['value']] = [];
+            $newFormSpec[$field['value']]['localHtmlName'] = $field['value'];
+            $newFormSpec[$field['value']]['property'] = $key;
+            if(array_key_exists($key,$data)){
+                $newFormSpec[$field['value']]['value'] = $data[$key];
+            }else
+                $newFormSpec[$field['value']]['value'] = [];
         }
 
-        $this->formSpecification = $formSpecification;
-        //dump($this->formSpecification); //exit;
+        $this->formSpecification = $newFormSpec;
+//        dump($this->formSpecification); //exit;
 
         // Manage form submission.
         $builder->addEventListener(
@@ -314,7 +292,8 @@ abstract class SemanticFormType extends AbstractType
 
         if (isset($this->formSpecification[$localHtmlName]['value'])) {
             // Label.
-            $options['label'] = $this->formSpecification[$localHtmlName]['label'];
+            //TODO set label thanks to the conf file
+//            $options['label'] = $this->formSpecification[$localHtmlName]['label'];
             // Get value.
             $options['data']   = $this->fieldDecode(
                 $type,
